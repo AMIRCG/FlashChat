@@ -1,9 +1,14 @@
 // ignore_for_file: deprecated_member_use, library_private_types_in_public_api, avoid_print, unused_local_variable
 
+import 'package:flash_chat/components/messageStream.dart';
 import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+final _auth = FirebaseAuth.instance; //firebase_auth
+
+final fbStore = FirebaseFirestore.instance; //cloud_firestore
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -13,17 +18,15 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final messageTextEditing = TextEditingController();
   User? loggedInUser;
   String? messeageText;
-
-  final _auth = FirebaseAuth.instance; //firebase_auth
-
-  final fbStore = FirebaseFirestore.instance; //cloud_firestore
 
   CollectionReference message =
       FirebaseFirestore.instance.collection("message"); //collection message
 
   Future<void> addMessage() {
+    messageTextEditing.clear();
     return message
         .add(
           {
@@ -55,12 +58,10 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   } //Read Data one time read
 
-  //Stream documentStream = FirebaseFirestore.instance.collection('users').doc('ABC123').snapshots();
-  final Stream<QuerySnapshot> messageStream = FirebaseFirestore.instance
-      .collection('message')
-      .snapshots(); //collection message but return to stream
-
   void getMessageStream() async {
+    final Stream<QuerySnapshot> messageStream = FirebaseFirestore.instance
+        .collection('message')
+        .snapshots(); //collection message but return to stream
     await for (var snapShot in messageStream) {
       for (var message in snapShot.docs) {
         print(message.data.call()); //return map
@@ -83,13 +84,12 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: const Icon(Icons.close),
               onPressed: () {
-                // _auth.signOut();
-                // Navigator.pop(context);
+                _auth.signOut();
+                Navigator.pop(context);
                 // getMessage();
-                getMessageStream();
               }),
         ],
-        // title: const Text('⚡️Chat'),
+        title: const Text('⚡️Chat'),
         backgroundColor: Colors.lightBlueAccent,
       ),
       body: SafeArea(
@@ -97,51 +97,7 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            StreamBuilder<QuerySnapshot>(
-              stream: messageStream,
-              builder: ((BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('401'),
-                  );
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: Text('Loading...'),
-                  );
-                }
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.red,
-                    ),
-                  );
-                }
-                if (snapshot.hasData) {
-                  final messages = snapshot.data!.docs;
-                  List<Text> messageWidgets = [];
-                  for (var message in messages) {
-                    Map<String, dynamic> messageMap =
-                        message.data() as Map<String, dynamic>;
-                    final messageText = messageMap['text'];
-                    final messageSender = messageMap['sender'];
-
-                    final messageWidget =
-                        Text('$messageText from $messageSender');
-
-                    messageWidgets.add(messageWidget);
-                  }
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: messageWidgets,
-                  );
-                }
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }),
-            ),
+            MessagesStream(),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -149,6 +105,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
+                      controller: messageTextEditing,
                       onChanged: (value) {
                         messeageText = value;
                       },
@@ -171,51 +128,3 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
-/*
- StreamBuilder<QuerySnapshot>(
-                    stream: messageStream,
-                    builder: ((BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.hasData) {
-                        final messages = snapshot.data!.docs;
-                        List<Text> messageWidgets = [];
-                        for (var message in messages) {
-                          Map<String, dynamic> messageMap =
-                              message.data() as Map<String, dynamic>;
-                          final messageText = messageMap['text'];
-                          final messageSender = messageMap['sender'];
-
-                          final messageWidget =
-                              Text('$messageText from $messageSender');
-
-                          messageWidgets.add(messageWidget);
-                        }
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: messageWidgets,
-                        );
-                      }
-                      return const Center(
-                        child: Text('Loading...'),
-                      );
-                    }),
-                  ),
-
-
-
-Expanded(
-                    child: TextField(
-                      onChanged: (value) {
-                        messeageText = value;
-                      },
-                      decoration: kMessageTextFieldDecoration,
-                    ),
-                  ),
-                  FlatButton(
-                    onPressed: addMessage,
-                    child: const Text(
-                      'Send',
-                      style: kSendButtonTextStyle,
-                    ),
-                  ),
-*/
