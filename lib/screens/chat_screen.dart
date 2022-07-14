@@ -10,6 +10,8 @@ final _auth = FirebaseAuth.instance; //firebase_auth
 
 final fbStore = FirebaseFirestore.instance; //cloud_firestore
 
+User? loggedInUser; //login user currently
+
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
 
@@ -19,13 +21,88 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final messageTextEditing = TextEditingController();
-  User? loggedInUser;
+
   String? messeageText;
+  int? numberId; //last of the id message => id ++
 
   CollectionReference message =
       FirebaseFirestore.instance.collection("message"); //collection message
 
-  Future<void> addMessage() {
+  Future<void> testDB() async {
+//////////////////////////////////////////////////////////
+    /*
+    QuerySnapshot
+     message.get().then((QuerySnapshot querySnapshot) {
+       for (var doc in querySnapshot.docs) {
+        print(doc["text"]);
+      }
+     });
+     */
+//////////////////////////////////////////////////////////
+    /*
+    DocumentSnapshot
+    message.doc('123').get().then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        print(documentSnapshot.data());
+      } else {
+        print('this document not exist');
+      }
+    });
+    */
+//////////////////////////////////////////////////////////
+    /*
+    Filtering
+
+    FirebaseFirestore.instance
+      .collection('users')
+      .where('age', isGreaterThan: 20)
+      .get()
+      .then(...);
+
+    or
+
+    FirebaseFirestore.instance
+        .collection('users')
+        .where('language', arrayContainsAny: ['en', 'it'])
+        .get()
+        .then(...);
+      */
+//////////////////////////////////////////////////////////
+    /*
+    Limiting
+
+     message.limit(1).get().then((QuerySnapshot querySnapshot) {
+      List<QueryDocumentSnapshot> list = querySnapshot.docs;
+      print(list[0].data());
+    });
+  
+    or 
+    message
+        .orderBy('text')
+        .limitToLast(2)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      List<QueryDocumentSnapshot> list = querySnapshot.docs;
+      print(list[1].data());
+    });
+
+    */
+    //////////////////////////////////////////////////////////
+    /*
+    Ordering
+
+    message.orderBy('text').get().then((QuerySnapshot querySnapshot) {
+      List<QueryDocumentSnapshot> list = querySnapshot.docs;
+      for (var index in list) {
+        print(index.data());
+      }
+    });
+
+      */
+    //////////////////////////////////////////////////////////
+  }
+
+  Future<void> addMessage() async {
     messageTextEditing.clear();
     return message
         .add(
@@ -86,6 +163,7 @@ class _ChatScreenState extends State<ChatScreen> {
               onPressed: () {
                 _auth.signOut();
                 Navigator.pop(context);
+
                 // getMessage();
               }),
         ],
@@ -119,6 +197,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       style: kSendButtonTextStyle,
                     ),
                   ),
+                  // FlatButton(
+                  //   onPressed: () async {
+                  //     await testDB();
+                  //   },
+                  //   child: const Text(
+                  //     'testDB',
+                  //     style: kSendButtonTextStyle,
+                  //   ),
+                  // ),
                 ],
               ),
             ),

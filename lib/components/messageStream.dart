@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flash_chat/components/MessageCover.dart';
+import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 
 class MessagesStream extends StatelessWidget {
@@ -34,7 +35,8 @@ class MessagesStream extends StatelessWidget {
           );
         }
         if (snapshot.hasData) {
-          final messages = snapshot.data!.docs;
+          final messages = snapshot.data!.docs.reversed;
+
           List<MessageCover> messageWidgets = [];
           for (var message in messages) {
             Map<String, dynamic> messageMap =
@@ -42,15 +44,26 @@ class MessagesStream extends StatelessWidget {
             final messageText = messageMap['text'];
             final messageSender = messageMap['sender'];
 
+            final currentUser = loggedInUser!.email;
+
+            bool isMe;
+            if (currentUser == messageSender) {
+              isMe = true;
+            } else {
+              isMe = false;
+            }
+
             final messageWidget = MessageCover(
               text: messageText.toString(),
               sender: messageSender.toString(),
+              isMe: isMe,
             );
 
             messageWidgets.add(messageWidget);
           }
           return Expanded(
             child: ListView(
+              reverse: true,
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               children: messageWidgets,
             ),

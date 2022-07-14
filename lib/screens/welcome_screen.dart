@@ -63,11 +63,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           children: <Widget>[
             Row(
               children: <Widget>[
-                SizedBox(
-                  //controller.value
-                  //animation!.value * 100,
-                  height: 60,
-                  child: Image.asset('images/logo.png'),
+                Hero(
+                  tag: 'logo',
+                  child: SizedBox(
+                    //controller.value
+                    //animation!.value * 100,
+                    height: 60,
+                    child: Image.asset('images/logo.png'),
+                  ),
                 ),
                 const Text(
                   // '${controller!.value.toInt()}%',

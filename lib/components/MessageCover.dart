@@ -3,15 +3,18 @@
 import 'package:flutter/material.dart';
 
 class MessageCover extends StatelessWidget {
-  const MessageCover({Key? key, this.sender, this.text}) : super(key: key);
+  const MessageCover({Key? key, this.sender, this.text, required this.isMe})
+      : super(key: key);
   final String? text;
   final String? sender;
+  final bool isMe;
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Text(
             sender!,
@@ -22,14 +25,24 @@ class MessageCover extends StatelessWidget {
           ),
           Material(
             elevation: 5,
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.lightBlueAccent,
+            borderRadius: isMe
+                ? const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  )
+                : const BorderRadius.only(
+                    topRight: Radius.circular(30),
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  ),
+            color: isMe ? Colors.lightBlueAccent : Colors.white,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               child: Text(
                 text!,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: isMe ? Colors.white : Colors.black,
                   fontSize: 20,
                 ),
               ),
